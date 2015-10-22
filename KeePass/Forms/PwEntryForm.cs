@@ -872,6 +872,7 @@ namespace KeePass.Forms
 
 			if(this.EntrySaved != null) this.EntrySaved(this, EventArgs.Empty);
 
+            m_pwEntry.Changed();
 			return true;
 		}
 

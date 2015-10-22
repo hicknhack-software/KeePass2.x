@@ -164,6 +164,8 @@ namespace KeePass.Forms
 			if(m_rbAutoTypeInherit.Checked)
 				m_pwGroup.DefaultAutoTypeSequence = string.Empty;
 			else m_pwGroup.DefaultAutoTypeSequence = m_tbDefaultAutoTypeSeq.Text;
+
+            m_pwGroup.Changed();
 		}
 
 		private void OnBtnCancel(object sender, EventArgs e)

@@ -272,6 +272,7 @@ namespace KeePassLib
 			}
 		}
 
+        public static EventHandler<ObjectTouchedEventArgs> EntryModified;
 		public static EventHandler<ObjectTouchedEventArgs> EntryTouched;
 		public EventHandler<ObjectTouchedEventArgs> Touched;
 
@@ -563,6 +564,13 @@ namespace KeePassLib
 
 			if(bTouchParents && (m_pParentGroup != null))
 				m_pParentGroup.Touch(bModified, true);
+		}
+
+        public void Changed()
+        {
+            if (PwEntry.EntryModified != null)
+                PwEntry.EntryModified(this,
+                    new ObjectTouchedEventArgs(this, true, false));
 		}
 
 		/// <summary>

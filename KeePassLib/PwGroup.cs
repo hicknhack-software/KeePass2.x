@@ -284,6 +284,13 @@ namespace KeePassLib
 		public static EventHandler<ObjectTouchedEventArgs> GroupTouched;
 		public EventHandler<ObjectTouchedEventArgs> Touched;
 
+        public static EventHandler<ObjectTouchedEventArgs> GroupModified;
+        public static EventHandler<ObjectTouchedEventArgs> GroupAdded;
+        public static EventHandler<ObjectTouchedEventArgs> GroupRemoved;
+        public static EventHandler<ObjectTouchedEventArgs> EntryAdded;
+        public static EventHandler<ObjectTouchedEventArgs> EntryRemoved;
+
+
 		/// <summary>
 		/// Construct a new, empty group.
 		/// </summary>
@@ -538,6 +545,13 @@ namespace KeePassLib
 
 			if(bTouchParents && (m_pParentGroup != null))
 				m_pParentGroup.Touch(bModified, true);
+		}
+
+        public void Changed()
+        {
+            if (PwGroup.GroupModified != null)
+                PwGroup.GroupModified(this,
+                    new ObjectTouchedEventArgs(this, true, false));
 		}
 
 		/// <summary>
@@ -1474,9 +1488,15 @@ namespace KeePassLib
 
 			m_listGroups.Add(subGroup);
 
-			if(bTakeOwnership) subGroup.m_pParentGroup = this;
+            if (bTakeOwnership)
+            {
+                if (subGroup.ParentGroup != null && GroupRemoved != null) GroupRemoved.Invoke(subGroup.m_pParentGroup, new ObjectTouchedEventArgs(subGroup, true, true));
+                subGroup.m_pParentGroup = this;
+            }
 
 			if(bUpdateLocationChangedOfSub) subGroup.LocationChanged = DateTime.Now;
+
+            if (GroupAdded != null) GroupAdded.Invoke(this, new ObjectTouchedEventArgs(subGroup, true, true));
 		}
 
 		/// <summary>
@@ -1509,9 +1529,17 @@ namespace KeePassLib
 
 			// Do not remove the entry from its previous parent group,
 			// only assign it to the new one
-			if(bTakeOwnership) pe.ParentGroup = this;
+            if (bTakeOwnership)
+            {
+                if (pe.ParentGroup != null && EntryRemoved != null) EntryRemoved.Invoke(pe.ParentGroup, new ObjectTouchedEventArgs(pe, true, true));
+                pe.ParentGroup = this;
+            }
+                    
 
 			if(bUpdateLocationChangedOfEntry) pe.LocationChanged = DateTime.Now;
+
+            if( EntryAdded != null) EntryAdded.Invoke(this, new ObjectTouchedEventArgs(pe, true, true));
+			//pe.Touch(true, true);
 		}
 
 		public void SortSubGroups(bool bRecursive)
@@ -1529,15 +1557,20 @@ namespace KeePassLib
 		{
 			DateTime dtNow = DateTime.Now;
 
-			foreach(PwEntry pe in m_listEntries)
+			foreach(PwEntry pe in m_listEntries.CloneShallow())
 			{
+                m_listEntries.Remove(pe);
+                if (pe.ParentGroup != null && EntryRemoved != null) EntryRemoved.Invoke(pe.ParentGroup, new ObjectTouchedEventArgs(pe, true, true));
+
 				PwDeletedObject pdo = new PwDeletedObject(pe.Uuid, dtNow);
 				pdContext.DeletedObjects.Add(pdo);
 			}
 			m_listEntries.Clear();
 
-			foreach(PwGroup pg in m_listGroups)
+			foreach(PwGroup pg in m_listGroups.CloneShallow())
 			{
+                m_listGroups.Remove(pg);
+                if (pg.ParentGroup != null && GroupRemoved != null) GroupRemoved.Invoke(pg.ParentGroup, new ObjectTouchedEventArgs(pg, true, true));
 				pg.DeleteAllObjects(pdContext);
 
 				PwDeletedObject pdo = new PwDeletedObject(pg.Uuid, dtNow);
