@@ -46,7 +46,7 @@ namespace KeePass.DataExchange
 {
 	public static class ImportUtil
 	{
-        public static event EventHandler ImportSuccessful;
+        public static event EventHandler<ImportedEventArgs> ImportSuccessful;
 
 		public static bool? Import(PwDatabase pwStorage, out bool bAppendedToRootOnly,
 			Form fParent)
@@ -82,7 +82,7 @@ namespace KeePass.DataExchange
 				false, null, false, fParent);
             if( bImported.HasValue && bImported.Value )
             {
-                if (ImportUtil.ImportSuccessful != null) ImportUtil.ImportSuccessful.Invoke(null, EventArgs.Empty);
+                if (ImportUtil.ImportSuccessful != null) ImportUtil.ImportSuccessful.Invoke(null, new ImportedEventArgs( pwStorage ) );
             }
             return bImported;
 		}
@@ -311,7 +311,7 @@ namespace KeePass.DataExchange
 
 			pd.MergeIn(pdImp, mm);
 
-            if (ImportUtil.ImportSuccessful != null) ImportUtil.ImportSuccessful.Invoke(null, EventArgs.Empty);
+            if (ImportUtil.ImportSuccessful != null) ImportUtil.ImportSuccessful.Invoke(null, new ImportedEventArgs(pd));
 			return true;
 		}
 

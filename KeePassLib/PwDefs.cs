@@ -464,6 +464,16 @@ namespace KeePassLib
 		}
 	}
 
+    public sealed class ImportedEventArgs : EventArgs
+    {
+        private PwDatabase m_pwStorage;
+        public PwDatabase PwStorage {  get { return m_pwStorage; } }
+        public ImportedEventArgs(PwDatabase pwStoage)
+        {
+            m_pwStorage = pwStoage;
+        }
+    }
+
 	public sealed class IOAccessEventArgs : EventArgs
 	{
 		private IOConnectionInfo m_ioc;

@@ -1531,8 +1531,8 @@ namespace KeePassLib
 			// only assign it to the new one
             if (bTakeOwnership)
             {
-                if (pe.ParentGroup != null && EntryRemoved != null) EntryRemoved.Invoke(pe.ParentGroup, new ObjectTouchedEventArgs(pe, true, true));
                 pe.ParentGroup = this;
+                if (pe.ParentGroup != null && EntryRemoved != null) EntryRemoved.Invoke(pe.ParentGroup, new ObjectTouchedEventArgs(pe, true, true));
             }
                     
 
