@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -225,6 +225,8 @@ namespace KeePass.Forms
 		/// Event that is fired after a database has been saved.
 		/// </summary>
 		public event EventHandler<FileSavedEventArgs> FileSaved;
+
+		public event EventHandler FormLoadPost;
 
 		public event EventHandler<CancelEntryEventArgs> DefaultEntryAction;
 

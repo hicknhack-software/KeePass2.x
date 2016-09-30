@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ using KeePassLib.Cryptography.PasswordGenerator;
 using KeePassLib.Delegates;
 using KeePassLib.Security;
 using KeePassLib.Utility;
+
+using NativeLib = KeePassLib.Native.NativeLib;
 
 namespace KeePass.Forms
 {
@@ -228,6 +230,9 @@ namespace KeePass.Forms
 			m_icgPassword.Attach(m_tbPassword, m_cbHidePassword, m_lblPasswordRepeat,
 				m_tbRepeatPassword, m_lblQuality, m_pbQuality, m_lblQualityInfo,
 				m_ttRect, this, bHideInitial, false);
+			m_icgPassword.ContextDatabase = m_pwDatabase;
+			m_icgPassword.ContextEntry = m_pwEntry;
+			m_icgPassword.IsSprVariant = true;
 
 			if(m_pwEntry.Expires)
 			{
@@ -900,7 +905,7 @@ namespace KeePass.Forms
 				ushort usEsc = NativeMethods.GetAsyncKeyState((int)Keys.Escape);
 				if((usEsc & 0x8000) != 0) m_bForceClosing = false;
 			}
-			catch(Exception) { Debug.Assert(KeePassLib.Native.NativeLib.IsUnix()); }
+			catch(Exception) { Debug.Assert(NativeLib.IsUnix()); }
 		}
 
 		private void CleanUpEx()
@@ -1450,10 +1455,8 @@ namespace KeePass.Forms
 			if(pgf.ShowDialog() == DialogResult.OK)
 			{
 				byte[] pbEntropy = EntropyForm.CollectEntropyIfEnabled(pgf.SelectedProfile);
-				ProtectedString psNew;
-				PwGenerator.Generate(out psNew, pgf.SelectedProfile, pbEntropy,
-					Program.PwGeneratorPool);
-
+				ProtectedString psNew = PwGeneratorUtil.GenerateAcceptable(
+					pgf.SelectedProfile, pbEntropy, m_pwEntry, m_pwDatabase);
 				byte[] pbNew = psNew.ReadUtf8();
 				m_icgPassword.SetPassword(pbNew, true);
 				MemUtil.ZeroByteArray(pbNew);
@@ -1492,8 +1495,8 @@ namespace KeePass.Forms
 
 			if(pwp != null)
 			{
-				ProtectedString psNew;
-				PwGenerator.Generate(out psNew, pwp, null, Program.PwGeneratorPool);
+				ProtectedString psNew = PwGeneratorUtil.GenerateAcceptable(
+					pwp, null, m_pwEntry, m_pwDatabase);
 				byte[] pbNew = psNew.ReadUtf8();
 				m_icgPassword.SetPassword(pbNew, true);
 				MemUtil.ZeroByteArray(pbNew);
@@ -1982,14 +1985,18 @@ namespace KeePass.Forms
 
 			AddOverrideUrlItem(l, "cmd://{INTERNETEXPLORER} \"{URL}\"",
 				AppLocator.InternetExplorerPath);
+			AddOverrideUrlItem(l, "cmd://{INTERNETEXPLORER} -private \"{URL}\"",
+				AppLocator.InternetExplorerPath);
 			AddOverrideUrlItem(l, "microsoft-edge:{URL}",
 				AppLocator.EdgePath);
 			AddOverrideUrlItem(l, "cmd://{FIREFOX} \"{URL}\"",
 				AppLocator.FirefoxPath);
-			AddOverrideUrlItem(l, "cmd://{OPERA} \"{URL}\"",
-				AppLocator.OperaPath);
 			AddOverrideUrlItem(l, "cmd://{GOOGLECHROME} \"{URL}\"",
 				AppLocator.ChromePath);
+			AddOverrideUrlItem(l, "cmd://{GOOGLECHROME} --incognito \"{URL}\"",
+				AppLocator.ChromePath);
+			AddOverrideUrlItem(l, "cmd://{OPERA} \"{URL}\"",
+				AppLocator.OperaPath);
 			AddOverrideUrlItem(l, "cmd://{SAFARI} \"{URL}\"",
 				AppLocator.SafariPath);
 

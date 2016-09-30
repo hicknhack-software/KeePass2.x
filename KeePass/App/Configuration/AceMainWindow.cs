@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -131,6 +131,14 @@ namespace KeePass.App.Configuration
 			set { m_bCloseMin = value; }
 		}
 
+		private bool m_bEscMin = false;
+		[DefaultValue(false)]
+		public bool EscMinimizesToTray
+		{
+			get { return m_bEscMin; }
+			set { m_bEscMin = value; }
+		}
+
 		private bool m_bMinToTray = false;
 		[DefaultValue(false)]
 		public bool MinimizeToTray
@@ -238,6 +246,14 @@ namespace KeePass.App.Configuration
 		{
 			get { return m_bCopyUrls; }
 			set { m_bCopyUrls = value; }
+		}
+
+		private bool m_bEntrySelGroupSel = true;
+		[DefaultValue(true)]
+		public bool EntrySelGroupSel
+		{
+			get { return m_bEntrySelGroupSel; }
+			set { m_bEntrySelGroupSel = value; }
 		}
 
 		private bool m_bDisableSaveIfNotModified = false;

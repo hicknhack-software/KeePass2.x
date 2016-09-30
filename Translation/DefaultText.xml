@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translation>
 	<StringTable Name="KPRes" Namespace="KeePass.Resources">
+		<Data Name="Abort">
+			<Value>Abort</Value>
+		</Data>
 		<Data Name="AbortTrigger">
 			<Value>Abort current trigger execution</Value>
 		</Data>
@@ -157,6 +160,9 @@
 		<Data Name="AutoType">
 			<Value>Auto-Type</Value>
 		</Data>
+		<Data Name="AutoTypeAlwaysShowSelDialog">
+			<Value>Always show global auto-type entry selection dialog</Value>
+		</Data>
 		<Data Name="AutoTypeCancelOnTitleChange">
 			<Value>Cancel auto-type when the target window title changes</Value>
 		</Data>
@@ -166,8 +172,8 @@
 		<Data Name="AutoTypeEntrySelection">
 			<Value>Auto-Type Entry Selection</Value>
 		</Data>
-		<Data Name="AutoTypeEntrySelectionDescLong">
-			<Value>Multiple entries have been found for the currently active window. Please select the entry, which you want to auto-type into the active window.</Value>
+		<Data Name="AutoTypeEntrySelectionDescLong2">
+			<Value>The following entries have been found for the currently active target window. Please select the entry that you want to auto-type into the target window.</Value>
 		</Data>
 		<Data Name="AutoTypeEntrySelectionDescShort">
 			<Value>Multiple entries exist for the current window.</Value>
@@ -279,6 +285,9 @@
 		</Data>
 		<Data Name="CheckingForUpd">
 			<Value>Checking for updates</Value>
+		</Data>
+		<Data Name="ClassicAdj">
+			<Value>Classic</Value>
 		</Data>
 		<Data Name="ClearKeyCmdLineParams">
 			<Value>Clear master key command line parameters after using them once</Value>
@@ -658,6 +667,9 @@
 		<Data Name="EntryListAutoResizeColumns">
 			<Value>Automatically resize entry list columns when resizing the main window</Value>
 		</Data>
+		<Data Name="EntrySelGroupSel">
+			<Value>When selecting an entry, automatically select its parent group, too</Value>
+		</Data>
 		<Data Name="EnvironmentVariable">
 			<Value>Environment variable</Value>
 		</Data>
@@ -673,6 +685,9 @@
 		<Data Name="Errors">
 			<Value>Errors</Value>
 		</Data>
+		<Data Name="EscMinimizesToTray">
+			<Value>Esc minimizes to tray instead of locking the workspace</Value>
+		</Data>
 		<Data Name="Event">
 			<Value>Event</Value>
 		</Data>
@@ -687,6 +702,9 @@
 		</Data>
 		<Data Name="ExpiredEntries">
 			<Value>Expired Entries</Value>
+		</Data>
+		<Data Name="ExpiredEntriesCanMatch">
+			<Value>Expired entries can match</Value>
 		</Data>
 		<Data Name="ExpiryTime">
 			<Value>Expiry Time</Value>
@@ -844,6 +862,9 @@
 		<Data Name="FileSaveQOpYesLocking">
 			<Value>Save all changes made to the database and lock the KeePass workspace.</Value>
 		</Data>
+		<Data Name="FileTxExtra">
+			<Value>Extra-safe file transactions</Value>
+		</Data>
 		<Data Name="FileVerifyHashFail">
 			<Value>The new file's content does not match the data that KeePass has written, i.e. writing to the file has failed and it might be corrupted now.</Value>
 		</Data>
@@ -931,8 +952,17 @@
 		<Data Name="GenProfileSaveDescLong">
 			<Value>Please enter a name for the new password generator profile, or select an existing profile name to overwrite it:</Value>
 		</Data>
+		<Data Name="GenPwAccept">
+			<Value>Accept this password?</Value>
+		</Data>
 		<Data Name="GenPwBasedOnPrevious">
 			<Value>Derive from previous password</Value>
+		</Data>
+		<Data Name="GenPwSprVariant">
+			<Value>The generated password contains a placeholder. When using this password (e.g. by copying it to the clipboard or auto-typing it), the placeholder will be replaced, i.e. effectively a different password might be used.</Value>
+		</Data>
+		<Data Name="Gradient">
+			<Value>Gradient</Value>
 		</Data>
 		<Data Name="Group">
 			<Value>Group</Value>
@@ -955,8 +985,8 @@
 		<Data Name="HelpSourceSelectionDesc">
 			<Value>Choose between local help and online help center.</Value>
 		</Data>
-		<Data Name="HexKey">
-			<Value>{PARAM}-Bit Hex Key</Value>
+		<Data Name="HexKeyEx">
+			<Value>Hex Key - {PARAM}-Bit</Value>
 		</Data>
 		<Data Name="HexViewer">
 			<Value>Hex Viewer</Value>
@@ -1032,6 +1062,9 @@
 		</Data>
 		<Data Name="ImportStc">
 			<Value>Import into active database</Value>
+		</Data>
+		<Data Name="IncompatibleEnv">
+			<Value>incompatible with current environment</Value>
 		</Data>
 		<Data Name="IncompatibleWithSorting">
 			<Value>incompatible with sorting</Value>
@@ -1168,8 +1201,11 @@
 		<Data Name="LockMenuUnlock">
 			<Value>Un&amp;lock Workspace</Value>
 		</Data>
-		<Data Name="LockOnMinimize">
-			<Value>Lock workspace when minimizing main window</Value>
+		<Data Name="LockOnMinimizeTaskbar">
+			<Value>Lock workspace when minimizing main window to taskbar</Value>
+		</Data>
+		<Data Name="LockOnMinimizeTray">
+			<Value>Lock workspace when minimizing main window to tray</Value>
 		</Data>
 		<Data Name="LockOnRemoteControlChange">
 			<Value>Lock workspace when the remote control mode changes</Value>
@@ -1281,6 +1317,9 @@
 		</Data>
 		<Data Name="NoCmd">
 			<Value>&amp;No</Value>
+		</Data>
+		<Data Name="NoEncNoCompress">
+			<Value>Make sure that it is not encrypted and not compressed.</Value>
 		</Data>
 		<Data Name="NoFileAccessRead">
 			<Value>The operating system didn't grant KeePass read access to the specified file.</Value>
@@ -1546,6 +1585,12 @@
 		<Data Name="PrintDesc">
 			<Value>Print password entries.</Value>
 		</Data>
+		<Data Name="Private">
+			<Value>Private</Value>
+		</Data>
+		<Data Name="Professional">
+			<Value>Professional</Value>
+		</Data>
 		<Data Name="QuickSearchExclExpired">
 			<Value>Exclude expired entries in quick searches</Value>
 		</Data>
@@ -1623,6 +1668,9 @@
 		</Data>
 		<Data Name="RestartKeePassQuestion">
 			<Value>Do you wish to restart KeePass now?</Value>
+		</Data>
+		<Data Name="Retry">
+			<Value>Retry</Value>
 		</Data>
 		<Data Name="RetryCmd">
 			<Value>&amp;Retry</Value>
@@ -1749,6 +1797,9 @@
 		</Data>
 		<Data Name="SelfTestFailed">
 			<Value>One or more of the KeePass self-tests failed.</Value>
+		</Data>
+		<Data Name="SendingNoun">
+			<Value>Sending</Value>
 		</Data>
 		<Data Name="Separator">
 			<Value>Separator</Value>
@@ -2035,9 +2086,6 @@
 		<Data Name="UrlSaveTitle">
 			<Value>Save To URL</Value>
 		</Data>
-		<Data Name="UseCustomToolStripRenderer">
-			<Value>Use custom ToolStrip renderer</Value>
-		</Data>
 		<Data Name="UseFileLocks">
 			<Value>Use database lock files</Value>
 		</Data>
@@ -2161,6 +2209,9 @@
 		<Data Name="ErrorInClipboard">
 			<Value>An extended error report has been copied to the clipboard.</Value>
 		</Data>
+		<Data Name="Expect100Continue">
+			<Value>Expect 100-Continue responses</Value>
+		</Data>
 		<Data Name="FatalError">
 			<Value>Fatal Error</Value>
 		</Data>
@@ -2206,6 +2257,9 @@
 		<Data Name="FrameworkNotImplExcp">
 			<Value>The .NET framework/runtime under which KeePass is currently running does not support this operation.</Value>
 		</Data>
+		<Data Name="General">
+			<Value>General</Value>
+		</Data>
 		<Data Name="InvalidCompositeKey">
 			<Value>The composite key is invalid!</Value>
 		</Data>
@@ -2227,6 +2281,15 @@
 		<Data Name="OldFormat">
 			<Value>The selected file appears to be an old format</Value>
 		</Data>
+		<Data Name="Passive">
+			<Value>Passive</Value>
+		</Data>
+		<Data Name="PreAuth">
+			<Value>Pre-authenticate</Value>
+		</Data>
+		<Data Name="Timeout">
+			<Value>Timeout</Value>
+		</Data>
 		<Data Name="TryAgainSecs">
 			<Value>Please try it again in a few seconds.</Value>
 		</Data>
@@ -2235,6 +2298,9 @@
 		</Data>
 		<Data Name="UserAccountKeyError">
 			<Value>The operating system did not grant KeePass read/write access to the user profile folder, where the protected user key is stored.</Value>
+		</Data>
+		<Data Name="UserAgent">
+			<Value>User agent</Value>
 		</Data>
 	</StringTable>
 </Translation>

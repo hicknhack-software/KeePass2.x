@@ -20,7 +20,7 @@
 	<meta name="DC.Format" content="text/html" />
 	<meta name="DC.Identifier" content="http://keepass.info/" />
 	<meta name="DC.Language" content="en" />
-	<meta name="DC.Rights" content="Copyright (c) 2003-2015 Dominik Reichl" />
+	<meta name="DC.Rights" content="Copyright (c) 2003-2016 Dominik Reichl" />
 
 	<title>Technical FAQ - KeePass</title>
 	<base target="_self" />
@@ -214,7 +214,7 @@ a remote computer or shared network drive, it's not displayed correctly
 (navigation aborted, ...).</p>
 
 <p><b>Solution:</b> See
-<a href="http://support.microsoft.com/kb/896358" target="_blank">Microsoft
+<a href="https://support.microsoft.com/en-us/kb/896358" target="_blank">Microsoft
 Security Bulletin MS05-026</a>.</p>
 
 <br />
@@ -231,9 +231,9 @@ Application icons are icons in Windows ICO format. They can be used in
 Windows shortcuts and/or as file association icons. The KeePass executable
 contains various application icons which can be used for these purposes.<br />
 <br />
-Additional application icons are available from the &quot;<code>Ext/Icons</code>&quot;
-directory of the KeePass source code <a href="http://keepass.info/download.html"
-target="_blank">download</a>.
+Additional application icons are available from the &quot;<code>Ext/Icons_*</code>&quot;
+directories of the KeePass source code <a href="http://keepass.info/download.html"
+target="_blank">package</a>.
 Most of them, shown at right, are slight variations of the main KeePass icon.<br />
 <br />
 Even more, contributed icons (by users) can be found on the
@@ -318,8 +318,9 @@ This does not apply to KeePass 2.x.
 <img src="../images/b16x16_help.png" class="singleimg" alt="Info" />&nbsp;&nbsp;Why
 doesn't Auto-Type work correctly on Polish systems?</h2>
 
-<p>On Polish systems, the default auto-type hot key <i>Ctrl+Alt+A</i> conflicts
-with a system command and is frequently used in typing.
+<p>On Polish systems, the default auto-type hot key
+<kbd><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd></kbd>
+conflicts with a system command and is frequently used in typing.
 Therefore, auto-type is often executed accidentally.</p>
 
 <p>The global auto-type hot key can be changed to a different key combination
@@ -512,8 +513,7 @@ operating systems.</p>
 creates a temporary file. Will it be erased securely?</h2>
 
 <p>KeePass creates a temporary HTML file when printing password lists and showing
-print previews. This file is securely erased (i.e. overwritten multiple times
-before being removed from the file system tree) when closing the database.</p>
+print previews. This file is securely deleted when closing the database.</p>
 
 <p>You must wait for the file being printed completely before closing KeePass
 (and close the print preview before closing KeePass), otherwise it could happen

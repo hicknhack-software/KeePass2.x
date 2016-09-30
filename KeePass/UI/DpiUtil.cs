@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -143,8 +143,20 @@ namespace KeePass.UI
 
 			try
 			{
-				if(WinUtil.IsAtLeastWindowsVista)
-					NativeMethods.SetProcessDPIAware();
+				// SetProcessDPIAware is obsolete; use
+				// SetProcessDpiAwareness on Windows 10 and higher
+				if(WinUtil.IsAtLeastWindows10) // 8.1 partially
+				{
+					if(NativeMethods.SetProcessDpiAwareness(
+						NativeMethods.ProcessDpiAwareness.SystemAware) < 0)
+					{
+						Debug.Assert(false);
+					}
+				}
+				else if(WinUtil.IsAtLeastWindowsVista)
+				{
+					if(!NativeMethods.SetProcessDPIAware()) { Debug.Assert(false); }
+				}
 			}
 			catch(Exception) { Debug.Assert(false); }
 		}
@@ -244,6 +256,31 @@ namespace KeePass.UI
 			int h = ScaleIntY(16);
 
 			return pd.GetCustomIcon(pwUuid, w, h);
+		}
+
+		[Conditional("DEBUG")]
+		internal static void AssertUIImage(Image img)
+		{
+#if DEBUG
+			if(img == null) { Debug.Assert(false); return; }
+
+			EnsureInitialized();
+
+			try
+			{
+				// Windows XP scales images based on the DPI resolution
+				// specified in the image file; thus ensure that the
+				// image file does not specify a DPI resolution;
+				// https://sourceforge.net/p/keepass/bugs/1487/
+
+				int d = (int)Math.Round(img.HorizontalResolution);
+				Debug.Assert((d == 0) || (d == m_nDpiX));
+
+				d = (int)Math.Round(img.VerticalResolution);
+				Debug.Assert((d == 0) || (d == m_nDpiY));
+			}
+			catch(Exception) { Debug.Assert(false); }
+#endif
 		}
 	}
 }

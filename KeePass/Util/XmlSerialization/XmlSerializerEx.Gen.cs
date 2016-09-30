@@ -214,6 +214,9 @@ namespace KeePass.Util.XmlSerialization
 					case "UseTransactedFileWrites":
 						o.UseTransactedFileWrites = ReadBoolean(xr);
 						break;
+					case "FileTxExtra":
+						o.FileTxExtra = ReadBoolean(xr);
+						break;
 					case "UseFileLocks":
 						o.UseFileLocks = ReadBoolean(xr);
 						break;
@@ -326,6 +329,9 @@ namespace KeePass.Util.XmlSerialization
 					case "CloseButtonMinimizesWindow":
 						o.CloseButtonMinimizesWindow = ReadBoolean(xr);
 						break;
+					case "EscMinimizesToTray":
+						o.EscMinimizesToTray = ReadBoolean(xr);
+						break;
 					case "MinimizeToTray":
 						o.MinimizeToTray = ReadBoolean(xr);
 						break;
@@ -364,6 +370,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "CopyUrlsInsteadOfOpening":
 						o.CopyUrlsInsteadOfOpening = ReadBoolean(xr);
+						break;
+					case "EntrySelGroupSel":
+						o.EntrySelGroupSel = ReadBoolean(xr);
 						break;
 					case "DisableSaveIfNotModified":
 						o.DisableSaveIfNotModified = ReadBoolean(xr);
@@ -469,8 +478,8 @@ namespace KeePass.Util.XmlSerialization
 					case "ShowRecycleConfirmDialog":
 						o.ShowRecycleConfirmDialog = ReadBoolean(xr);
 						break;
-					case "UseCustomToolStripRenderer":
-						o.UseCustomToolStripRenderer = ReadBoolean(xr);
+					case "ToolStripRenderer":
+						o.ToolStripRenderer = ReadString(xr);
 						break;
 					case "OptimizeForScreenReader":
 						o.OptimizeForScreenReader = ReadBoolean(xr);
@@ -548,6 +557,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "MasterPassword":
 						o.MasterPassword = ReadAceMasterPassword(xr);
+						break;
+					case "MasterKeyTries":
+						o.MasterKeyTries = ReadInt32(xr);
 						break;
 					case "MasterKeyOnSecureDesktop":
 						o.MasterKeyOnSecureDesktop = ReadBoolean(xr);
@@ -784,6 +796,12 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "AutoTypeMatchByTagInTitle":
 						o.AutoTypeMatchByTagInTitle = ReadBoolean(xr);
+						break;
+					case "AutoTypeExpiredCanMatch":
+						o.AutoTypeExpiredCanMatch = ReadBoolean(xr);
+						break;
+					case "AutoTypeAlwaysShowSelDialog":
+						o.AutoTypeAlwaysShowSelDialog = ReadBoolean(xr);
 						break;
 					case "AutoTypePrependInitSequenceForIE":
 						o.AutoTypePrependInitSequenceForIE = ReadBoolean(xr);
@@ -1027,6 +1045,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "CredSaveMode":
 						o.CredSaveMode = ReadIOCredSaveMode(xr);
+						break;
+					case "PropertiesEx":
+						o.PropertiesEx = ReadString(xr);
 						break;
 					default:
 						Debug.Assert(false);
@@ -1654,6 +1675,9 @@ namespace KeePass.Util.XmlSerialization
 				{
 					case "LockOnWindowMinimize":
 						o.LockOnWindowMinimize = ReadBoolean(xr);
+						break;
+					case "LockOnWindowMinimizeToTray":
+						o.LockOnWindowMinimizeToTray = ReadBoolean(xr);
 						break;
 					case "LockOnSessionSwitch":
 						o.LockOnSessionSwitch = ReadBoolean(xr);

@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -335,6 +335,14 @@ namespace KeePassLib
 
 			m_pwIcon = pwIcon;
 		}
+
+#if DEBUG
+		// For display in debugger
+		public override string ToString()
+		{
+			return (@"PwGroup '" + m_strName + @"'");
+		}
+#endif
 
 		/// <summary>
 		/// Deeply clone the current group. The returned group will be an exact
@@ -855,13 +863,9 @@ namespace KeePassLib
 			Regex rx = null;
 			if(sp.RegularExpression)
 			{
-#if KeePassRT
-				RegexOptions ro = RegexOptions.None;
-#else
-				RegexOptions ro = RegexOptions.Compiled;
-#endif
+				RegexOptions ro = RegexOptions.None; // RegexOptions.Compiled
 				if((sp.ComparisonMode == StringComparison.CurrentCultureIgnoreCase) ||
-#if !KeePassRT
+#if !KeePassUAP
 					(sp.ComparisonMode == StringComparison.InvariantCultureIgnoreCase) ||
 #endif
 					(sp.ComparisonMode == StringComparison.OrdinalIgnoreCase))

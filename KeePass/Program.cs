@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -241,13 +241,18 @@ namespace KeePass
 #endif
 			m_bDesignMode = false; // Designer doesn't call Main method
 
+			m_cmdLineArgs = new CommandLineArgs(args);
+
+			// Before loading the configuration
+			string strWaDisable = m_cmdLineArgs[
+				AppDefs.CommandLineOptions.WorkaroundDisable];
+			if(!string.IsNullOrEmpty(strWaDisable))
+				MonoWorkarounds.SetEnabled(strWaDisable, false);
+
+			DpiUtil.ConfigureProcess();
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.DoEvents(); // Required
-
-			m_cmdLineArgs = new CommandLineArgs(args);
-
-			DpiUtil.ConfigureProcess();
 
 #if DEBUG
 			string strInitialWorkDir = WinUtil.GetWorkingDirectory();
@@ -582,14 +587,18 @@ namespace KeePass
 
 			AppLogEx.Close();
 
+			if(m_tempFilesPool != null)
+			{
+				m_tempFilesPool.Clear(TempClearFlags.All);
+				m_tempFilesPool.WaitForThreads();
+			}
+
 			EnableThemingInScope.StaticDispose();
 		}
 
 		private static void MainCleanUp()
 		{
 			IpcBroadcast.StopServer();
-
-			if(m_tempFilesPool != null) m_tempFilesPool.Clear();
 
 			EntryMenu.Destroy();
 
@@ -743,7 +752,7 @@ namespace KeePass
 					if(!File.Exists(strLangPath)) continue;
 
 					XmlSerializerEx xs = new XmlSerializerEx(typeof(KPTranslation));
-					m_kpTranslation = KPTranslation.LoadFromFile(strLangPath, xs);
+					m_kpTranslation = KPTranslation.Load(strLangPath, xs);
 
 					KPRes.SetTranslatedStrings(
 						m_kpTranslation.SafeGetStringTableDictionary(

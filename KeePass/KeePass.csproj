@@ -18,8 +18,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -260,6 +259,15 @@
     <Compile Include="..\KeePassLib\Serialization\IOConnectionInfo.cs">
       <Link>KeePassLib\Serialization\IOConnectionInfo.cs</Link>
     </Compile>
+    <Compile Include="..\KeePassLib\Serialization\IocProperties.cs">
+      <Link>KeePassLib\Serialization\IocProperties.cs</Link>
+    </Compile>
+    <Compile Include="..\KeePassLib\Serialization\IocPropertyInfo.cs">
+      <Link>KeePassLib\Serialization\IocPropertyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\KeePassLib\Serialization\IocPropertyInfoPool.cs">
+      <Link>KeePassLib\Serialization\IocPropertyInfoPool.cs</Link>
+    </Compile>
     <Compile Include="..\KeePassLib\Serialization\KdbxFile.cs">
       <Link>KeePassLib\Serialization\KdbxFile.cs</Link>
     </Compile>
@@ -362,6 +370,7 @@
     <Compile Include="DataExchange\Formats\MozillaBookmarksJson100.cs" />
     <Compile Include="DataExchange\Formats\NetworkPwMgrCsv4.cs" />
     <Compile Include="DataExchange\Formats\NortonIdSafeCsv2013.cs" />
+    <Compile Include="DataExchange\Formats\NPasswordNpw102.cs" />
     <Compile Include="DataExchange\Formats\OnePwProCsv599.cs" />
     <Compile Include="DataExchange\Formats\PassKeeper12.cs" />
     <Compile Include="DataExchange\Formats\PinsTxt450.cs" />
@@ -709,6 +718,7 @@
     <Compile Include="Native\NativeMethods.Structs.cs" />
     <Compile Include="Native\NativeMethods.Unix.cs" />
     <Compile Include="Native\NativeProgressDialog.cs" />
+    <Compile Include="Native\ShellLinkEx.cs" />
     <Compile Include="Plugins\PlgxCache.cs" />
     <Compile Include="Plugins\PlgxCsprojLoader.cs" />
     <Compile Include="Plugins\PlgxPluginInfo.cs" />
@@ -738,7 +748,6 @@
     <Compile Include="UI\CustomToolStripEx.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="UI\CustomToolStripRendererEx.cs" />
     <Compile Include="UI\CustomTreeViewEx.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -775,7 +784,14 @@
     <Compile Include="UI\TabControlEx.cs">
     </Compile>
     <Compile Include="UI\TaskbarList.cs" />
-    <Compile Include="UI\ThemeToolStripRenderer.cs" />
+    <Compile Include="UI\ToolStripRendering\ProExtTsr.cs" />
+    <Compile Include="UI\ToolStripRendering\SystemTsr.cs" />
+    <Compile Include="UI\ToolStripRendering\TsrFactory.cs" />
+    <Compile Include="UI\ToolStripRendering\KeePassTsr.cs" />
+    <Compile Include="UI\ToolStripRendering\TsrPool.cs" />
+    <Compile Include="UI\ToolStripRendering\VisualStyleTsr.cs" />
+    <Compile Include="UI\ToolStripRendering\Win10Tsr.cs" />
+    <Compile Include="UI\ToolStripRendering\Win81Tsr.cs" />
     <Compile Include="UI\UISystemFonts.cs" />
     <Compile Include="UI\UserActivityNotifyFilter.cs" />
     <Compile Include="UI\VistaTaskDialog.cs">
@@ -1047,6 +1063,7 @@
     <Compile Include="Util\SendInputExt\SiEngineUnix.cs" />
     <Compile Include="Util\SendInputExt\SiEngineWin.cs" />
     <Compile Include="Util\SendInputExt\SiObf.cs" />
+    <Compile Include="Util\SendInputExt\SiWindowInfo.cs" />
     <Compile Include="Util\SessionLockNotifier.cs" />
     <Compile Include="Util\HotKeyManager.cs" />
     <Compile Include="Util\ShellUtil.cs" />
@@ -1066,7 +1083,6 @@
     <Compile Include="Util\XmlUtil.XmlReplace.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Resources\Nuvola\B16x16_1DownArrow.png" />
   </ItemGroup>
   <ItemGroup>
@@ -1185,6 +1201,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="KeePass.ico" />
+    <None Include="Resources\Nuvola\B16x16_Folder.png" />
+    <None Include="Resources\Images\B16x16_Imp_NPassword.png" />
     <None Include="Resources\Nuvola_Derived\B16x16_Folder_New_Ex.png" />
     <None Include="Resources\Nuvola_Derived\B16x16_TextAlignRight.png" />
     <None Include="Resources\Nuvola_Derived\B16x16_TextAlignLeft.png" />

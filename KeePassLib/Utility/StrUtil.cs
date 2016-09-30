@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,19 +20,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
-using System.Globalization;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+
+#if !KeePassUAP
+using System.Drawing;
+using System.Security.Cryptography;
+#endif
 
 using KeePassLib.Collections;
 using KeePassLib.Cryptography.PasswordGenerator;
 using KeePassLib.Native;
 using KeePassLib.Security;
-using KeePassLib.Resources;
 
 namespace KeePassLib.Utility
 {
@@ -219,8 +221,8 @@ namespace KeePassLib.Utility
 				List<StrEncodingInfo> l = new List<StrEncodingInfo>();
 
 				l.Add(new StrEncodingInfo(StrEncodingType.Default,
-#if KeePassRT
-					StrUtil.Utf8.WebName, StrUtil.Utf8, 1, null));
+#if KeePassUAP
+					"Unicode (UTF-8)", StrUtil.Utf8, 1, new byte[] { 0xEF, 0xBB, 0xBF }));
 #else
 #if !KeePassLibSD
 					Encoding.Default.EncodingName,
@@ -230,12 +232,11 @@ namespace KeePassLib.Utility
 					Encoding.Default,
 					(uint)Encoding.Default.GetBytes("a").Length, null));
 #endif
-#if !KeePassRT
+
 				l.Add(new StrEncodingInfo(StrEncodingType.Ascii,
 					"ASCII", Encoding.ASCII, 1, null));
 				l.Add(new StrEncodingInfo(StrEncodingType.Utf7,
 					"Unicode (UTF-7)", Encoding.UTF7, 1, null));
-#endif
 				l.Add(new StrEncodingInfo(StrEncodingType.Utf8,
 					"Unicode (UTF-8)", StrUtil.Utf8, 1, new byte[] { 0xEF, 0xBB, 0xBF }));
 				l.Add(new StrEncodingInfo(StrEncodingType.Utf16LE,
@@ -244,7 +245,8 @@ namespace KeePassLib.Utility
 				l.Add(new StrEncodingInfo(StrEncodingType.Utf16BE,
 					"Unicode (UTF-16 BE)", new UnicodeEncoding(true, false),
 					2, new byte[] { 0xFE, 0xFF }));
-#if (!KeePassLibSD && !KeePassRT)
+
+#if !KeePassLibSD
 				l.Add(new StrEncodingInfo(StrEncodingType.Utf32LE,
 					"Unicode (UTF-32 LE)", new UTF32Encoding(false, false),
 					4, new byte[] { 0xFF, 0xFE, 0x0, 0x0 }));
@@ -495,7 +497,7 @@ namespace KeePassLib.Utility
 			if(excp.StackTrace != null)
 				strText += excp.StackTrace + MessageService.NewLine;
 #if !KeePassLibSD
-#if !KeePassRT
+#if !KeePassUAP
 			if(excp.TargetSite != null)
 				strText += excp.TargetSite.ToString() + MessageService.NewLine;
 #endif
@@ -521,7 +523,7 @@ namespace KeePassLib.Utility
 				if(excp.InnerException.StackTrace != null)
 					strText += excp.InnerException.StackTrace + MessageService.NewLine;
 #if !KeePassLibSD
-#if !KeePassRT
+#if !KeePassUAP
 				if(excp.InnerException.TargetSite != null)
 					strText += excp.InnerException.TargetSite.ToString();
 #endif
@@ -758,7 +760,7 @@ namespace KeePassLib.Utility
 			return sb.ToString();
 		}
 
-		private static Regex m_rxNaturalSplit = null;
+		/* private static Regex g_rxNaturalSplit = null;
 		public static int CompareNaturally(string strX, string strY)
 		{
 			Debug.Assert(strX != null);
@@ -769,39 +771,31 @@ namespace KeePassLib.Utility
 			if(NativeMethods.SupportsStrCmpNaturally)
 				return NativeMethods.StrCmpNaturally(strX, strY);
 
-			strX = strX.ToLower(); // Case-insensitive comparison
-			strY = strY.ToLower();
+			if(g_rxNaturalSplit == null)
+				g_rxNaturalSplit = new Regex(@"([0-9]+)", RegexOptions.Compiled);
 
-			if(m_rxNaturalSplit == null)
-				m_rxNaturalSplit = new Regex(@"([0-9]+)",
-#if KeePassRT
-					RegexOptions.None);
-#else
-					RegexOptions.Compiled);
-#endif
+			string[] vPartsX = g_rxNaturalSplit.Split(strX);
+			string[] vPartsY = g_rxNaturalSplit.Split(strY);
 
-			string[] vPartsX = m_rxNaturalSplit.Split(strX);
-			string[] vPartsY = m_rxNaturalSplit.Split(strY);
-
-			for(int i = 0; i < Math.Min(vPartsX.Length, vPartsY.Length); ++i)
+			int n = Math.Min(vPartsX.Length, vPartsY.Length);
+			for(int i = 0; i < n; ++i)
 			{
 				string strPartX = vPartsX[i], strPartY = vPartsY[i];
 				int iPartCompare;
 
 #if KeePassLibSD
-				ulong uX = 0, uY = 0;
 				try
 				{
-					uX = ulong.Parse(strPartX);
-					uY = ulong.Parse(strPartY);
+					ulong uX = ulong.Parse(strPartX);
+					ulong uY = ulong.Parse(strPartY);
 					iPartCompare = uX.CompareTo(uY);
 				}
-				catch(Exception) { iPartCompare = strPartX.CompareTo(strPartY); }
+				catch(Exception) { iPartCompare = string.Compare(strPartX, strPartY, true); }
 #else
 				ulong uX, uY;
 				if(ulong.TryParse(strPartX, out uX) && ulong.TryParse(strPartY, out uY))
 					iPartCompare = uX.CompareTo(uY);
-				else iPartCompare = strPartX.CompareTo(strPartY);
+				else iPartCompare = string.Compare(strPartX, strPartY, true);
 #endif
 
 				if(iPartCompare != 0) return iPartCompare;
@@ -809,6 +803,106 @@ namespace KeePassLib.Utility
 
 			if(vPartsX.Length == vPartsY.Length) return 0;
 			if(vPartsX.Length < vPartsY.Length) return -1;
+			return 1;
+		} */
+
+		public static int CompareNaturally(string strX, string strY)
+		{
+			Debug.Assert(strX != null);
+			if(strX == null) throw new ArgumentNullException("strX");
+			Debug.Assert(strY != null);
+			if(strY == null) throw new ArgumentNullException("strY");
+
+			if(NativeMethods.SupportsStrCmpNaturally)
+				return NativeMethods.StrCmpNaturally(strX, strY);
+
+			int cX = strX.Length;
+			int cY = strY.Length;
+			if(cX == 0) return ((cY == 0) ? 0 : -1);
+			if(cY == 0) return 1;
+
+			char chFirstX = strX[0];
+			char chFirstY = strY[0];
+			bool bExpNum = ((chFirstX >= '0') && (chFirstX <= '9'));
+			bool bExpNumY = ((chFirstY >= '0') && (chFirstY <= '9'));
+			if(bExpNum != bExpNumY) return string.Compare(strX, strY, true);
+
+			int pX = 0;
+			int pY = 0;
+			while((pX < cX) && (pY < cY))
+			{
+				Debug.Assert(((strX[pX] >= '0') && (strX[pX] <= '9')) == bExpNum);
+				Debug.Assert(((strY[pY] >= '0') && (strY[pY] <= '9')) == bExpNum);
+
+				int pExclX = pX + 1;
+				while(pExclX < cX)
+				{
+					char ch = strX[pExclX];
+					bool bChNum = ((ch >= '0') && (ch <= '9'));
+					if(bChNum != bExpNum) break;
+					++pExclX;
+				}
+
+				int pExclY = pY + 1;
+				while(pExclY < cY)
+				{
+					char ch = strY[pExclY];
+					bool bChNum = ((ch >= '0') && (ch <= '9'));
+					if(bChNum != bExpNum) break;
+					++pExclY;
+				}
+
+				string strPartX = strX.Substring(pX, pExclX - pX);
+				string strPartY = strY.Substring(pY, pExclY - pY);
+
+				bool bStrCmp = true;
+				if(bExpNum)
+				{
+					// 2^64 - 1 = 18446744073709551615 has length 20
+					if((strPartX.Length <= 19) && (strPartY.Length <= 19))
+					{
+						ulong uX, uY;
+						if(ulong.TryParse(strPartX, out uX) && ulong.TryParse(strPartY, out uY))
+						{
+							if(uX < uY) return -1;
+							if(uX > uY) return 1;
+
+							bStrCmp = false;
+						}
+						else { Debug.Assert(false); }
+					}
+					else
+					{
+						double dX, dY;
+						if(double.TryParse(strPartX, out dX) && double.TryParse(strPartY, out dY))
+						{
+							if(dX < dY) return -1;
+							if(dX > dY) return 1;
+
+							bStrCmp = false;
+						}
+						else { Debug.Assert(false); }
+					}
+				}
+				if(bStrCmp)
+				{
+					int c = string.Compare(strPartX, strPartY, true);
+					if(c != 0) return c;
+				}
+
+				bExpNum = !bExpNum;
+				pX = pExclX;
+				pY = pExclY;
+			}
+
+			if(pX >= cX)
+			{
+				Debug.Assert(pX == cX);
+				if(pY >= cY) { Debug.Assert(pY == cY); return 0; }
+				return -1;
+			}
+
+			Debug.Assert(pY == cY);
 			return 1;
 		}
 
@@ -1188,7 +1282,7 @@ namespace KeePassLib.Utility
 				byte[] pbEnc = ProtectedData.Protect(pbPlain, m_pbOptEnt,
 					DataProtectionScope.CurrentUser);
 
-#if (!KeePassLibSD && !KeePassRT)
+#if (!KeePassLibSD && !KeePassUAP)
 				return Convert.ToBase64String(pbEnc, Base64FormattingOptions.None);
 #else
 				return Convert.ToBase64String(pbEnc);
@@ -1248,7 +1342,7 @@ namespace KeePassLib.Utility
 			return v;
 		}
 
-		private static readonly char[] m_vTagSep = new char[]{ ',', ';', ':' };
+		private static readonly char[] m_vTagSep = new char[] { ',', ';', ':' };
 		public static string TagsToString(List<string> vTags, bool bForDisplay)
 		{
 			if(vTags == null) throw new ArgumentNullException("vTags");
@@ -1301,7 +1395,7 @@ namespace KeePassLib.Utility
 			Array.Reverse(pb);
 			for(int i = 0; i < pb.Length; ++i) pb[i] = (byte)(pb[i] ^ 0x65);
 
-#if (!KeePassLibSD && !KeePassRT)
+#if (!KeePassLibSD && !KeePassUAP)
 			return Convert.ToBase64String(pb, Base64FormattingOptions.None);
 #else
 			return Convert.ToBase64String(pb);
@@ -1461,7 +1555,7 @@ namespace KeePassLib.Utility
 
 			if(strMimeType == null) strMimeType = "application/octet-stream";
 
-#if (!KeePassLibSD && !KeePassRT)
+#if (!KeePassLibSD && !KeePassUAP)
 			return ("data:" + strMimeType + ";base64," + Convert.ToBase64String(
 				pbData, Base64FormattingOptions.None));
 #else
@@ -1491,12 +1585,7 @@ namespace KeePassLib.Utility
 			if(bBase64) return Convert.FromBase64String(strData);
 
 			MemoryStream ms = new MemoryStream();
-
-#if KeePassRT
-			Encoding enc = StrUtil.Utf8;
-#else
 			Encoding enc = Encoding.ASCII;
-#endif
 
 			string[] v = strData.Split('%');
 			byte[] pb = enc.GetBytes(v[0]);

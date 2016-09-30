@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,12 +19,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using System.Security;
-using System.Security.Cryptography;
+using System.Text;
 using System.Xml;
+
+#if !KeePassUAP
+using System.Security.Cryptography;
+#endif
 
 #if !KeePassLibSD
 using System.IO.Compression;
@@ -174,6 +177,12 @@ namespace KeePassLib.Serialization
 			// case a different application has created the KDBX file and ignored
 			// the history maintenance settings)
 			m_pwDatabase.MaintainBackups(); // Don't mark database as modified
+
+			// Expand the root group, such that in case the user accidently
+			// collapses the root group he can simply reopen the database
+			PwGroup pgRoot = m_pwDatabase.RootGroup;
+			if(pgRoot != null) pgRoot.IsExpanded = true;
+			else { Debug.Assert(false); }
 
 			m_pbHashOfHeader = null;
 		}

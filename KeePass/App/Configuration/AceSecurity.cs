@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -61,6 +61,14 @@ namespace KeePass.App.Configuration
 				if(value == null) throw new ArgumentNullException("value");
 				m_mp = value;
 			}
+		}
+
+		private int m_nMasterKeyTries = 3;
+		[DefaultValue(3)]
+		public int MasterKeyTries
+		{
+			get { return m_nMasterKeyTries; }
+			set { m_nMasterKeyTries = value; }
 		}
 
 		private bool m_bSecureDesktop = false;
@@ -127,6 +135,14 @@ namespace KeePass.App.Configuration
 		{
 			get { return m_bOnMinimize; }
 			set { m_bOnMinimize = value; }
+		}
+
+		private bool m_bOnMinimizeToTray = false;
+		[DefaultValue(false)]
+		public bool LockOnWindowMinimizeToTray
+		{
+			get { return m_bOnMinimizeToTray; }
+			set { m_bOnMinimizeToTray = value; }
 		}
 
 		private bool m_bOnSessionSwitch = false;

@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2015 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 using System;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
@@ -389,6 +390,15 @@ namespace KeePass.Forms
 				m_tvGroups.BackColor = AppDefs.ColorControlNormal;
 			}
 
+			PwEntry pe = s.SelectedEntry;
+			if(Program.Config.MainWindow.EntrySelGroupSel && (pe != null))
+			{
+				PwGroup pgInitial = GetSelectedGroup();
+				PwGroup pgToSel = pe.ParentGroup;
+				if((pgToSel != null) && (pgToSel != pgInitial))
+					SetSelectedGroup(pgToSel, true);
+			}
+
 			m_lvEntries.Enabled = s.DatabaseOpened;
 
 			m_statusPartSelected.Text = s.EntriesSelected.ToString() +
@@ -398,6 +408,7 @@ namespace KeePass.Forms
 
 			string strWindowText = PwDefs.ShortProductName;
 			string strNtfText = PwDefs.ShortProductName;
+			int qSmall = UIUtil.GetSmallIconSize(32, 32).Width;
 
 			if(s.FileLocked)
 			{
@@ -424,7 +435,7 @@ namespace KeePass.Forms
 				strNtfText = strNtfPre + strFileDesc;
 
 				Icon icoDisposable, icoAssignable;
-				CreateColorizedIcon(Properties.Resources.QuadLocked, false,
+				CreateColorizedIcon(Properties.Resources.QuadLocked, qSmall,
 					ref m_kvpIcoTrayLocked, out icoAssignable, out icoDisposable);
 				m_ntfTray.Icon = icoAssignable;
 				if(icoDisposable != null) icoDisposable.Dispose();
@@ -435,7 +446,7 @@ namespace KeePass.Forms
 			else if(s.DatabaseOpened == false)
 			{
 				Icon icoDisposable, icoAssignable;
-				CreateColorizedIcon(Properties.Resources.QuadNormal, false,
+				CreateColorizedIcon(Properties.Resources.QuadNormal, qSmall,
 					ref m_kvpIcoTrayNormal, out icoAssignable, out icoDisposable);
 				m_ntfTray.Icon = icoAssignable;
 				if(icoDisposable != null) icoDisposable.Dispose();
@@ -458,7 +469,7 @@ namespace KeePass.Forms
 					m_docMgr.ActiveDatabase.IOConnectionInfo.Path, 63 - strNtfPre.Length);
 
 				Icon icoDisposable, icoAssignable;
-				CreateColorizedIcon(Properties.Resources.QuadNormal, false,
+				CreateColorizedIcon(Properties.Resources.QuadNormal, qSmall,
 					ref m_kvpIcoTrayNormal, out icoAssignable, out icoDisposable);
 				m_ntfTray.Icon = icoAssignable;
 				if(icoDisposable != null) icoDisposable.Dispose();
@@ -483,7 +494,7 @@ namespace KeePass.Forms
 			m_ntfTray.Text = StrUtil.CompactString3Dots(strNtfText, 63);
 
 			Icon icoToDispose, icoToAssign;
-			if(CreateColorizedIcon(Properties.Resources.KeePass, true,
+			if(CreateColorizedIcon(Properties.Resources.KeePass, 0,
 				ref m_kvpIcoMain, out icoToAssign, out icoToDispose))
 				this.Icon = icoToAssign;
 			if(icoToDispose != null) icoToDispose.Dispose();
@@ -534,7 +545,6 @@ namespace KeePass.Forms
 
 			m_tbAddEntry.Enabled = s.DatabaseOpened;
 
-			PwEntry pe = s.SelectedEntry;
 			ShowEntryDetails(pe);
 
 			m_tbCopyUserName.Enabled = s.CanCopyUserName;
@@ -608,6 +618,9 @@ namespace KeePass.Forms
 
 			m_ctxGroupSort.Enabled = ((pg != null) && (pg.Groups.UCount > 1));
 			m_ctxGroupSortRec.Enabled = (uSubGroups > 1);
+
+			m_ctxGroupExpand.Enabled = (uSubGroups > 0);
+			m_ctxGroupCollapse.Enabled = (uSubGroups > 0);
 
 			bool bShowEmpty = false, bEnableEmpty = false;
 			if((pd != null) && pd.RecycleBinEnabled)
@@ -850,6 +863,20 @@ namespace KeePass.Forms
 			TreeNode tn = m_tvGroups.SelectedNode;
 			if(tn == null) return null;
 			return (tn.Tag as PwGroup);
+		}
+
+		internal void SetSelectedGroup(PwGroup pg, bool bEnsureVisible)
+		{
+			if(pg == null) { Debug.Assert(false); return; }
+
+			TreeNode tn = GuiFindGroup(pg.Uuid, null);
+			if(tn != null)
+			{
+				m_tvGroups.SelectedNode = tn;
+
+				if(bEnsureVisible) tn.EnsureVisible();
+			}
+			else { Debug.Assert(false); }
 		}
 
 		/// <summary>
@@ -1323,8 +1350,8 @@ namespace KeePass.Forms
 
 				if(tn.Nodes.Count > 0)
 				{
-					if((tn.IsExpanded) && (!pg.IsExpanded)) tn.Collapse();
-					else if((!tn.IsExpanded) && (pg.IsExpanded)) tn.Expand();
+					if(tn.IsExpanded && !pg.IsExpanded) tn.Collapse();
+					else if(!tn.IsExpanded && pg.IsExpanded) tn.Expand();
 				}
 
 				if(pg == pgFind) tnFound = tn;
@@ -1570,10 +1597,13 @@ namespace KeePass.Forms
 		}
 
 		private void EvAppendEntryField(RichTextBuilder rb,
-			string strItemSeparator, string strName, string strValue,
+			string strItemSeparator, string strName, string strRawValue,
 			PwEntry peSprCompile)
 		{
-			if(string.IsNullOrEmpty(strValue)) return;
+			if(strRawValue == null) { Debug.Assert(false); return; }
+
+			string strValue = strRawValue.Trim();
+			if(strValue.Length == 0) return;
 
 			rb.Append(strName, FontStyle.Bold, strItemSeparator, null, ":", " ");
 
@@ -1587,7 +1617,7 @@ namespace KeePass.Forms
 				if(strCmp == strValue) rb.Append(strValue);
 				else
 				{
-					rb.Append(strCmp + " - ");
+					rb.Append(strCmp.Trim() + " - ");
 					rb.Append(strValue, FontStyle.Italic);
 				}
 			}
@@ -1785,7 +1815,28 @@ namespace KeePass.Forms
 			pg.IsVirtual = true;
 
 			SearchParameters sp = new SearchParameters();
-			sp.SearchString = strSearch;
+
+			if(strSearch.StartsWith(@"//") && strSearch.EndsWith(@"//") &&
+				(strSearch.Length > 4))
+			{
+				string strRegex = strSearch.Substring(2, strSearch.Length - 4);
+
+				try // Validate regular expression
+				{
+					Regex rx = new Regex(strRegex, RegexOptions.IgnoreCase);
+					rx.IsMatch("ABCD");
+				}
+				catch(Exception exReg)
+				{
+					MessageService.ShowWarning(exReg.Message);
+					return;
+				}
+
+				sp.SearchString = strRegex;
+				sp.RegularExpression = true;
+			}
+			else sp.SearchString = strSearch;
+
 			sp.SearchInTitles = sp.SearchInUserNames =
 				sp.SearchInUrls = sp.SearchInNotes = sp.SearchInOther =
 				sp.SearchInUuids = sp.SearchInGroupNames = sp.SearchInTags = true;
@@ -1907,7 +1958,7 @@ namespace KeePass.Forms
 				return ioc.CloneDeep();
 
 			IOConnectionForm dlg = new IOConnectionForm();
-			dlg.InitEx(bSave, ioc.CloneDeep(), bCanRememberCred, bTestConnection);
+			dlg.InitEx(bSave, ioc, bCanRememberCred, bTestConnection);
 			if(UIUtil.ShowDialogNotValue(dlg, DialogResult.OK)) return null;
 
 			IOConnectionInfo iocResult = dlg.IOConnectionInfo;
@@ -2036,7 +2087,7 @@ namespace KeePass.Forms
 			bool bAbort;
 			if(cmpKey == null)
 			{
-				for(int iTry = 0; iTry < 3; ++iTry)
+				for(int iTry = 0; iTry < Program.Config.Security.MasterKeyTries; ++iTry)
 				{
 					OdKpfConstructParams kpfParams = new OdKpfConstructParams();
 					kpfParams.IOConnectionInfo = ioc;
@@ -2319,22 +2370,27 @@ namespace KeePass.Forms
 
 		private TreeNode GuiFindGroup(PwUuid puSearch, TreeNode tnContainer)
 		{
-			Debug.Assert(puSearch != null);
-			if(puSearch == null) return null;
+			if(puSearch == null) { Debug.Assert(false); return null; }
 
-			if(m_tvGroups.Nodes.Count == 0) return null;
+			if(tnContainer == null)
+			{
+				if(m_tvGroups.Nodes.Count == 0) return null;
+				tnContainer = m_tvGroups.Nodes[0];
+			}
 
-			if(tnContainer == null) tnContainer = m_tvGroups.Nodes[0];
+			PwGroup pg = (tnContainer.Tag as PwGroup);
+			if(pg != null)
+			{
+				if(pg.Uuid.Equals(puSearch)) return tnContainer;
+			}
+			else { Debug.Assert(false); }
 
 			foreach(TreeNode tn in tnContainer.Nodes)
 			{
-				if(((PwGroup)tn.Tag).Uuid.Equals(puSearch))
-					return tn;
-
 				if(tn != tnContainer)
 				{
-					TreeNode tnSub = GuiFindGroup(puSearch, tn);
-					if(tnSub != null) return tnSub;
+					TreeNode tnRet = GuiFindGroup(puSearch, tn);
+					if(tnRet != null) return tnRet;
 				}
 				else { Debug.Assert(false); }
 			}
@@ -2904,6 +2960,7 @@ namespace KeePass.Forms
 			UIUtil.AssignShortcut(m_menuFileSyncFile, Keys.Control | Keys.R);
 			UIUtil.AssignShortcut(m_menuFileSyncUrl, Keys.Control | Keys.Shift | Keys.R);
 			UIUtil.AssignShortcut(m_menuFileLock, Keys.Control | Keys.L);
+			UIUtil.AssignShortcut(m_menuFileExit, Keys.Control | Keys.Q);
 
 			UIUtil.AssignShortcut(m_menuEditFind, Keys.Control | Keys.F);
 
@@ -2928,6 +2985,7 @@ namespace KeePass.Forms
 			m_ctxEntryPerformAutoType.ShortcutKeyDisplayString = strCtrl + "V";
 			m_ctxEntryAdd.ShortcutKeyDisplayString = strCtrl + "I";
 			m_ctxEntryEdit.ShortcutKeyDisplayString = KPRes.KeyboardKeyReturn;
+			m_ctxEntryDuplicate.ShortcutKeyDisplayString = strCtrl + "K";
 			m_ctxEntryDelete.ShortcutKeyDisplayString = UIUtil.GetKeysName(Keys.Delete); // "Del"
 			m_ctxEntrySelectAll.ShortcutKeyDisplayString = strCtrl + "A";
 
@@ -2965,8 +3023,9 @@ namespace KeePass.Forms
 				tsmiTarget.ShortcutKeyDisplayString = strSh;
 		}
 
-		private void SaveDatabaseAs(PwDatabase pdToSave, bool bOnline,
-			object sender, bool bCopy)
+		// Public for plugins
+		public void SaveDatabaseAs(PwDatabase pdToSave, IOConnectionInfo iocTo,
+			bool bOnline, object sender, bool bCopy)
 		{
 			PwDatabase pd = (pdToSave ?? m_docMgr.ActiveDatabase);
 
@@ -2982,12 +3041,16 @@ namespace KeePass.Forms
 			}
 
 			DialogResult dr;
-			IOConnectionInfo ioc = new IOConnectionInfo();
+			IOConnectionInfo ioc = iocTo;
 
-			if(bOnline)
+			if((ioc != null) && (ioc.Path.Length > 0))
+			{
+				dr = DialogResult.OK; // Caller (plugin) specified target file
+			}
+			else if(bOnline)
 			{
 				IOConnectionForm iocf = new IOConnectionForm();
-				iocf.InitEx(true, pd.IOConnectionInfo.CloneDeep(), true, true);
+				iocf.InitEx(true, pd.IOConnectionInfo, true, true);
 
 				dr = iocf.ShowDialog();
 				ioc = iocf.IOConnectionInfo;
@@ -3388,7 +3451,10 @@ namespace KeePass.Forms
 			{
 				bool bInvokeSave = false;
 
-				if(Program.Config.Application.FileClosing.AutoSave)
+				// https://sourceforge.net/p/keepass/discussion/329220/thread/c3c823c6/
+				bool bCanAutoSave = AppPolicy.Current.SaveFile;
+
+				if(Program.Config.Application.FileClosing.AutoSave && bCanAutoSave)
 					bInvokeSave = true;
 				else
 				{
@@ -3440,6 +3506,7 @@ namespace KeePass.Forms
 				UpdateUI(true, null, true, null, true, null, false);
 
 			// NativeMethods.ClearIconicBitmaps(this.Handle);
+			Program.TempFilesPool.Clear(TempClearFlags.ContentTaggedFiles);
 
 			if(this.FileClosed != null)
 			{
@@ -3732,7 +3799,13 @@ namespace KeePass.Forms
 				// if(MonoWorkarounds.IsRequired(649266)) this.ShowInTaskbar = true;
 			}
 
-			if(!bMinimize) // Restore
+			if(bMinimize)
+			{
+				if(Program.Config.Security.WorkspaceLocking.LockOnWindowMinimizeToTray &&
+					!IsFileLocked(null) && IsCommandTypeInvokable(null, AppCommandType.Lock))
+					OnFileLock(null, EventArgs.Empty);
+			}
+			else // Restore
 			{
 				// EnsureVisibleForegroundWindow(false, false); // Don't!
 
@@ -3976,6 +4049,30 @@ namespace KeePass.Forms
 			if(n > 1)
 				m_tabMain.SelectedIndex = ((m_tabMain.SelectedIndex +
 					iDir + n) % n);
+		}
+
+		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+		{
+			if(keyData == Keys.Escape)
+			{
+				bool? obKeyDown = NativeMethods.IsKeyDownMessage(ref msg);
+				if(obKeyDown.HasValue)
+				{
+					if(obKeyDown.Value)
+					{
+						if(Program.Config.MainWindow.EscMinimizesToTray)
+						{
+							if(IsCommandTypeInvokable(null, AppCommandType.Window))
+								MinimizeToTray(true);
+						}
+						else LockAllDocuments();
+					}
+
+					return true;
+				}
+			}
+
+			return base.ProcessCmdKey(ref msg, keyData);
 		}
 
 		private bool HandleMainWindowKeyMessage(KeyEventArgs e, bool bDown)
@@ -5032,7 +5129,7 @@ namespace KeePass.Forms
 			UpdateUI(false, null, true, null, false, null, true);
 		}
 
-		private bool CreateColorizedIcon(Icon icoBase, bool bLargeIcon,
+		private bool CreateColorizedIcon(Icon icoBase, int qSize,
 			ref KeyValuePair<Color, Icon> kvpStore, out Icon icoAssignable,
 			out Icon icoDisposable)
 		{
@@ -5057,8 +5154,7 @@ namespace KeePass.Forms
 			else
 			{
 				kvpStore = new KeyValuePair<Color, Icon>(clrNew,
-					UIUtil.CreateColorizedIcon(icoBase, clrNew,
-						bLargeIcon ? 0 : 32));
+					UIUtil.CreateColorizedIcon(icoBase, clrNew, qSize));
 				icoAssignable = kvpStore.Value;
 			}
 
@@ -5095,6 +5191,8 @@ namespace KeePass.Forms
 				m_menuToolsPlugins.Enabled = false;
 			if((u & (ulong)AceUIFlags.DisableTriggers) != 0)
 				m_menuToolsTriggers.Enabled = false;
+			if((u & (ulong)AceUIFlags.DisableUpdateCheck) != 0)
+				m_menuHelpCheckForUpdates.Enabled = false;
 		}
 
 		private static void OnFormLoadParallelAsync(object stateInfo)
@@ -5104,7 +5202,7 @@ namespace KeePass.Forms
 				PopularPasswords.Add(Properties.Resources.MostPopularPasswords, true);
 
 				string strShInstUtil = UrlUtil.GetFileDirectory(
-					WinUtil.GetExecutable(), true, false) + AppDefs.ShInstUtil;
+					WinUtil.GetExecutable(), true, false) + AppDefs.FileNames.ShInstUtil;
 
 				// Unblock the application such that the user isn't
 				// prompted next time anymore
